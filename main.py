@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = input("COUB url: ")
+url = input("url: ")
 r = requests.get(url)
 
 soup = BeautifulSoup(r.text, features="html.parser")
