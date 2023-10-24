@@ -1,12 +1,11 @@
+import time
+import os
 import requests
-from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
-url = input("url: ")
-r = requests.get(url)
+s = Service(executable_path='/Users/apple/Desktop/python_progects/parse/chromedriver_mac64/chromedriver')
+driver = webdriver.Chrome(service=s)
 
-soup = BeautifulSoup(r.text, features="html.parser")
-title = soup.find('h3', {'class': 'musicTitle'}).text
-author = soup.find('h3', {'class': 'musicAuthor'}).text
-
-print(f'author: {author}'
-      f'title: {title}')
