@@ -7,14 +7,13 @@ import json
 import csv
 import lxml
 
-
 headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15"
-    }
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15"
+}
+
 
 def products(soup, count, category_name):
-
     # Находим нужные поля и заполняем таблицу
     product_title = soup.find_all("a", class_=re.compile("CardText_link"))
     product_price = soup.find_all(class_=re.compile("CardPrice_bottom"))
@@ -44,6 +43,7 @@ def products(soup, count, category_name):
     with open(f"regard/{count}_{category_name}.json", "a", encoding="utf-8") as file:
         json.dump(product_info, file, indent=4, ensure_ascii=False)
 
+
 def main():
     # Достаем главную страницу
     url = "https://www.regard.ru"
@@ -53,14 +53,14 @@ def main():
 
     # with open("index.html", 'w') as file:
     #     file.write(src)
-
+    #
     # Достаем заголовки и ссылки на каталоги
     #
     # with open("index.html") as file:
     #     src = file.read()
     #
     soup = BeautifulSoup(src, "lxml")
-    all_products_href =  soup.find_all(class_=re.compile("Category_subTitle"))
+    all_products_href = soup.find_all(class_=re.compile("Category_subTitle"))
 
     all_categories_dict = {}
 
@@ -113,7 +113,7 @@ def main():
         pages = soup.find_all("a", class_="Pagination_item__link__vQTps")
         pages = int(pages[len(pages) - 1].text)
 
-        for page in range(2, pages+1):
+        for page in range(2, pages + 1):
             req = requests.get(url=category_href + f"?page={page}", headers=headers)
             src = req.text
 
