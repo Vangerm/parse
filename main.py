@@ -20,10 +20,5 @@ while True:
     if inp == 'break':
         break
     elif inp == 'regard':
-        inp = input('Какой раздел?\n').lower()
-        if inp == 'все':
-            regard.discharge_categories(categories_name=categories_name)
-            regard.load_categories()
-        elif inp in categories_name:
-            category_href = regard.open_json_file()[inp]
-            regard.discharge_category(category_name=inp, category_href=category_href)
+        # regard.discharge_categories(categories_name=categories_name)
+        regard.load_categories()

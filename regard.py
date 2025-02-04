@@ -8,17 +8,51 @@ import csv
 import functools
 
 
-headers = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5.2 Safari/605.1.15"
-}
+headers = [
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 9; Pixel 3)"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0)"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Linux; Ubuntu; X11; rv:92.0) Gecko/20100101 Firefox/92.0"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:60.0) Gecko/20100101 Firefox/60.0"
+    },
+    {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Opera/68.0.3618.173 (Windows NT 10.0; Win64; x64) Presto/2.12.388 Version/12.16"
+    }]
 
 
 def load_check(func):
     @functools.wraps(func)
-    def wrapper(category_name, category_href, count):
+    def wrapper(category_name, category_href):
         print(f'Начинаю выгружать {category_name}')
-        func(category_name, category_href, count)
+        func(category_name, category_href)
+        print(f"Выгрузка раздела - {category_name}, завершена.")
     return wrapper
 
 
@@ -36,21 +70,24 @@ def products(soup, category_name: str):
         category_name (str): категория выгрузки
     """
 
+    sleep(random.randrange(1, 3))
+
     # нахождение всех наименований товаров на страницы и их цен
     product_title = soup.find_all("a", class_=re.compile("CardText_link"))
     product_price = soup.find_all(class_=re.compile("CardPrice_bottom"))
 
     product_info = []
 
-    # перебор и выгрузка в данных в файлы csv и json
+    # перебор и выгрузка данных в файлы csv и json
     for item in range(len(product_title)):
         with open(f"regard/{category_name}.csv", "a", encoding="utf-8", newline='') as file:
             href = "https://www.regard.ru" + product_title[item].get("href")
+            price = int(''.join(char for char in product_price[item].text[:-2] if char.isdigit()))
             writer = csv.writer(file)
             writer.writerow(
                 (
                     product_title[item].text,
-                    product_price[item].text,
+                    price,
                     href
                 )
             )
@@ -58,7 +95,7 @@ def products(soup, category_name: str):
             product_info.append(
                 {
                     "Title": product_title[item].text,
-                    "Price": product_price[item].text,
+                    "Price": price,
                     "Href": href
                 }
             )
@@ -68,7 +105,7 @@ def products(soup, category_name: str):
         json.dump(product_info, file, indent=4, ensure_ascii=False)
 
 
-# @load_check - декоратор срабатывает, но функция нет, проверить!!!!
+@load_check
 def discharge_category(category_name: str, category_href: str):
 
     """Функция выгружает товары одной категории в файлы csv и json
@@ -83,13 +120,15 @@ def discharge_category(category_name: str, category_href: str):
     #     if item in category_name:
     #         category_name = category_name.replace(item, "_")
 
-    req = requests.get(url=category_href, headers=headers)
+    header = random.choice(headers)
+
+    req = requests.get(url=category_href, headers=header)
     src = req.text
 
-    # with open(f"regard/{category_name}.html", "w") as file:
-    #     file.write(src)
+    with open(f"regard/{category_name}.html", "w", encoding="utf-8") as file:
+        file.write(src)
 
-    # with open(f"regard/{category_name}.html") as file:
+    # with open(f"regard/{category_name}.html", encoding="utf-8") as file:
     #     src = file.read()
 
     soup = BeautifulSoup(src, "lxml")
@@ -109,18 +148,16 @@ def discharge_category(category_name: str, category_href: str):
 
     # Вытаскиваем страницы и находим максимальную
     pages = soup.find_all("a", class_=re.compile("PaginationBody_item__link"))
+    print(pages)
     pages = int(pages[-1].text)
 
     # перебираем страницы и дописываем товары
     for page in range(2, pages + 1):
-        req = requests.get(url=category_href + f"?page={page}", headers=headers)
+        req = requests.get(url=category_href + f"?page={page}", headers=header)
         src = req.text
 
         soup = BeautifulSoup(src, "lxml")
         products(soup=soup, category_name=category_name)
-
-    # print(f"Выгрузка раздела - {category_name}, завершена.") - занести в деккоратор
-    sleep(random.randrange(2, 4))
 
 
 def discharge_categories(categories_name):
@@ -132,8 +169,10 @@ def discharge_categories(categories_name):
     # Достаем главную страницу
     url = "https://www.regard.ru"
 
+    header = random.choice(headers)
+
     # Делаем запрос на страницу и выгружаем в переменную
-    req = requests.get(url, headers=headers)
+    req = requests.get(url, headers=header)
     src = req.text
 
     # with open("index.html", 'w') as file:
@@ -172,3 +211,4 @@ def load_categories():
     # Проходим по по всем категориям и записываем их в основную папку
     for category_name, category_href in all_categories.items():
         discharge_category(category_name=category_name, category_href=category_href)
+        sleep(random.randrange(5, 10))
