@@ -1,4 +1,4 @@
-import regard
+import regard.parser as regard
 
 categories_name = (
     'процессоры',
