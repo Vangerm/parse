@@ -1,6 +1,7 @@
 import random
 import re
 import requests
+from time import sleep
 from bs4 import BeautifulSoup
 import json
 import csv
@@ -130,18 +131,23 @@ class Parser:
                 name=tag,
                 class_=re.compile(class_serch)
                 )
+
+            sleep(random.randrange(1, 3))
+
             for item in all_products_href:
                 item_text = item.text.lower()
-                item_href = self.main_url + item.get("href")
 
-                if categories_name and item_text in categories_name:
-                    self.all_categories_dict[item_text] = item_href
+                if categories_name:
+                    if item_text in categories_name:
+                        item_href = self.main_url + item.get("href")
+                        self.all_categories_dict[item_text] = item_href
                 else:
+                    item_href = self.main_url + item.get("href")
                     self.all_categories_dict[item_text] = item_href
 
         # Выгружаем список в json файл
         with open(
-            f"categories/{self.main_url[11:]}_categories_dict.json",
+            f"categories/{self.main_url[12:]}_categories_dict.json",
                 "w",
                 encoding="utf-8") as file:
             json.dump(

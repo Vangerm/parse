@@ -1,4 +1,4 @@
-import regard.parser as regard
+from parser.parser import Parser
 
 categories_name = (
     'процессоры',
@@ -14,11 +14,12 @@ categories_name = (
     'ssd накопители'
     )
 
+if __name__ == '__main__':
+    parser = Parser()
 
-while True:
-    inp = input('Что выгружаем?\n')
-    if inp == 'break':
-        break
-    elif inp == 'regard':
-        # regard.discharge_categories(categories_name=categories_name)
-        regard.load_categories()
+    url = [
+        "https://www.citilink.ru/catalog/komplektuyuschie-dlya-pk/",
+        "https://www.citilink.ru/catalog/zhestkie-diski-i-ssd/"
+    ]
+
+    parser.discharge_categories(url, "app-catalog", categories_name=categories_name)
