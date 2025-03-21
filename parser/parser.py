@@ -68,15 +68,18 @@ class Parser:
         return []
 
     @staticmethod
-    def _main_web_url(url: str) -> str:
-        pass
+    def _main_web_url(url) -> None | str:
+        url = re.search(r'.*?\.ru', url)
+        if url:
+            url = url.group(0)
+        return url
 
     @classmethod
     def _soup_web(cls, url: str):
         req = requests.get(url, headers=random.choice(cls._HEADERS))
         src = req.text
 
-        return bs(src, 'lxml')
+        return bs(src, "lxml")
 
     def discharge_categories(
             self, urls: list[str] | str,
@@ -86,10 +89,12 @@ class Parser:
             ) -> None:
 
         self.urls = self._url_to_list(urls)
-        self.main_url =
+        if len(self.urls) < 1:
+            raise ValueError("Ссылка/и не найдены")
+        self.main_url = self._main_web_url(self.urls[0])
 
         # Словарь для хранения категорий с сайта
-        self.all_categories_dict = dict()
+        self.all_categories_dict: dict = dict()
 
         # Делаем запросы на страницы и выгружаем в переменную
         for url in self.urls:
@@ -97,4 +102,22 @@ class Parser:
                 name=tag,
                 class_=re.compile(class_serch)
                 )
-            pass
+            for item in all_products_href:
+                item_text = item.text.lower()
+                item_href = self.main_url + item.get("href")
+
+                if categories_name and item_text in categories_name:
+                    self.all_categories_dict[item_text] = item_href
+                else:
+                    self.all_categories_dict[item_text] = item_href
+
+        # Выгружаем список в json файл
+        with open(
+            f"categories/{self.main_url[8:]}_categories_dict.json",
+                "w",
+                encoding="utf-8") as file:
+            json.dump(
+                self.all_categories_dict,
+                file,
+                indent=4,
+                ensure_ascii=False)
