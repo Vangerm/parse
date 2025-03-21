@@ -1,7 +1,7 @@
 import random
 import re
 import requests
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 import json
 import csv
 
@@ -69,17 +69,33 @@ class Parser:
 
     @staticmethod
     def _main_web_url(url) -> None | str:
+        """Метод достает ссылку на главную страницу ресурса
+
+        Args:
+            url (str): ссылка на ресурс
+
+        Returns:
+            None | str: ссылка на главную страницу ресурса
+        """
         url = re.search(r'.*?\.ru', url)
         if url:
             url = url.group(0)
         return url
 
     @classmethod
-    def _soup_web(cls, url: str):
+    def _soup_web(cls, url: str) -> BeautifulSoup:
+        """Метод делающий запрос полученную ссылку и возвращающий ее страницу
+
+        Args:
+            url (str): ссылка на ресурс
+
+        Returns:
+            BeautifulSoup: html страница сайта
+        """
         req = requests.get(url, headers=random.choice(cls._HEADERS))
         src = req.text
 
-        return bs(src, "lxml")
+        return BeautifulSoup(src, "lxml")
 
     def discharge_categories(
             self, urls: list[str] | str,
@@ -87,10 +103,22 @@ class Parser:
             tag: str = 'a',
             categories_name: list[str] | str = []
             ) -> None:
+        """Метод для выгрузки ссылок из каталога на все
+        или определенные категории
+
+        Args:
+            urls (list[str] | str): список строк или строка ссылок
+            class_serch (str): наименование или часть наименования класса
+            tag (str, optional): Тег поиска. Defaults to 'a'.
+            categories_name (list[str] | str, optional): список строк или строка определенных категорий. Defaults to [].
+
+        Raises:
+            ValueError: Вызывается в случае не переданных ссылок/ки
+        """
 
         self.urls = self._url_to_list(urls)
         if len(self.urls) < 1:
-            raise ValueError("Ссылка/и не найдены")
+            raise ValueError("Ссылка/ки не найдены")
         self.main_url = self._main_web_url(self.urls[0])
 
         # Словарь для хранения категорий с сайта
@@ -113,7 +141,7 @@ class Parser:
 
         # Выгружаем список в json файл
         with open(
-            f"categories/{self.main_url[8:]}_categories_dict.json",
+            f"categories/{self.main_url[11:]}_categories_dict.json",
                 "w",
                 encoding="utf-8") as file:
             json.dump(
