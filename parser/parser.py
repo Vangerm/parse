@@ -96,6 +96,9 @@ class Parser:
         req = requests.get(url, headers=random.choice(cls._HEADERS))
         src = req.text
 
+        # with open("index.html", 'w', encoding='utf-8') as file:
+        #     file.write(src)
+
         return BeautifulSoup(src, "lxml")
 
     def discharge_categories(

@@ -17,9 +17,6 @@ categories_name = (
 if __name__ == '__main__':
     parser = Parser()
 
-    url = [
-        "https://www.citilink.ru/catalog/komplektuyuschie-dlya-pk/",
-        "https://www.citilink.ru/catalog/zhestkie-diski-i-ssd/"
-    ]
+    url = "https://www.pc4you.ru/"
 
-    parser.discharge_categories(url, "app-catalog", categories_name=categories_name)
+    parser.discharge_categories(url, "section", categories_name=categories_name)
